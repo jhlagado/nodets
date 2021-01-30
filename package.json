@@ -1,0 +1,22 @@
+{
+  "name": "nodets",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "@types/jest": "^24.0.11",
+    "jest": "^24.7.1",
+    "src": "^1.1.2",
+    "ts-jest": "^24.0.0",
+    "ts-node": "^8.0.3",
+    "typescript": "^3.2.4"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^1.7.0",
+    "@typescript-eslint/parser": "^1.7.0",
+    "eslint": "^5.16.0"
+  }
+}
