@@ -20,7 +20,7 @@ const fromIterSinkProc: Proc = (state, type, _arg) => {
     if (fiState.vars.completed) return;
     if (type === 1) {
         fiState.vars.got1 = true;
-        if (!fiState.vars.inloop && !fiState.vars.done) {
+        if (!(fiState.vars.inloop || fiState.vars.done)) {
             fiState.vars.inloop = true;
         }
         while (fiState.vars.inloop) {
