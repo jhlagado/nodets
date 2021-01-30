@@ -15,7 +15,7 @@ interface FromIterState extends State {
     };
 }
 
-const fromIterSinkProc: Proc = (state, type) => {
+const fromIterSinkProc: Proc = (state, type, _arg) => {
     const fiState = state as FromIterState;
     if (fiState.vars.completed) return;
     if (type === 1) {
@@ -74,7 +74,7 @@ interface ForEachState extends State {
 
 type Operation = (value: string) => void;
 
-const forEachSourceProc: Proc = (state, type, data?) => {
+const forEachSourceProc: Proc = (state, type, data) => {
     const feState = state as ForEachState;
     if (type === 0) feState.talkback = data as CB;
     if (type === 1) feState.operation(data as string);
@@ -95,5 +95,6 @@ const forEach = (operation: (value: string) => void) => (source: CB) => {
 
 const iterator = [10, 20, 30, 40][Symbol.iterator]();
 const source = fromIter(iterator);
+const printOp = (value: string) => console.log(value);
 
-forEach((x) => console.log(x))(source);
+forEach(printOp)(source);
