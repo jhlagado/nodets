@@ -1,8 +1,8 @@
 interface State {}
 
-type Proc = (state: State) => (type: number, tb?: CB | string) => void;
+type Proc = (state: State) => (type: number, arg?: CB | string | number) => void;
 type CB = { state: State; proc: Proc };
-const send = (cb: CB, type: number, arg?: CB) => cb.proc(cb.state)(type, arg);
+const send = (cb: CB, type: number, arg?: CB | string | number) => cb.proc(cb.state)(type, arg);
 
 interface FromIterState extends State {
   iterator: any;
@@ -15,38 +15,36 @@ interface FromIterState extends State {
   };
 }
 
-function fromIterLoop({ iterator, sink, vars }: FromIterState) {
-  vars.inloop = true;
-  while (vars.inloop) {
-    if (!vars.got1 || vars.completed) {
-      vars.inloop = false;
-      break;
-    } else {
-      vars.got1 = false;
-      const result = iterator.next();
-      vars.done = result.done;
-      const value = result.value;
-      if (vars.done) {
-        send(sink, 2);
-        vars.inloop = false;
-      } else {
-        send(sink, 1, value);
-      }
-    }
-  }
-}
-
 const fromIterSinkProc: Proc = (state) => (type) => {
   const fiState = state as FromIterState;
   if (fiState.vars.completed) return;
   if (type === 1) {
     fiState.vars.got1 = true;
-    if (!fiState.vars.inloop && !fiState.vars.done)
-      fromIterLoop(state as FromIterState);
+    if (!fiState.vars.inloop && !fiState.vars.done) {
+      fiState.vars.inloop = true;
+      while (fiState.vars.inloop) {
+        if (!fiState.vars.got1 || fiState.vars.completed) {
+          fiState.vars.inloop = false;
+          break;
+        } else {
+          fiState.vars.got1 = false;
+          const result = iterator.next();
+          fiState.vars.done = result.done!;
+          const value = result.value;
+          if (fiState.vars.done) {
+            send(fiState.sink, 2);
+            fiState.vars.inloop = false;
+          } else {
+            send(fiState.sink, 1, value);
+          }
+        }
+      }
+    }
   } else if (type === 2) {
     fiState.vars.completed = true;
   }
 };
+
 
 const fromIterSinkTB = (state: FromIterState): CB => {
   return { state, proc: fromIterSinkProc };
@@ -100,3 +98,5 @@ const iterator = [10, 20, 30, 40][Symbol.iterator]();
 const source = fromIter(iterator);
 
 forEach((x) => console.log(x))(source);
+
+
