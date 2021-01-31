@@ -44,16 +44,12 @@ const fromIterSinkProc: Proc = (state, type, _arg) => {
     }
 };
 
-const fromIterSinkTB = (state: FromIterState): CB => {
-    return { state, proc: fromIterSinkProc };
-};
-
 const fromIterProc: Proc = (state, type, sink): void => {
     if (type !== 0) return;
     const fiState = state as FromIterState;
     fiState.sink = sink as CB;
     fiState.vars = { inloop: false, got1: false, completed: false, done: false };
-    const tb = fromIterSinkTB(state as FromIterState);
+    const tb = { state, proc: fromIterSinkProc };
     send(sink as CB, 0, tb);
 };
 
