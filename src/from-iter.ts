@@ -1,4 +1,4 @@
-import { CB, Mode, Proc, send, State } from "./common";
+import { CB, Mode, Proc, send, State } from './common';
 interface FromIterState extends State {
     iterator: any;
     sink: CB;
@@ -10,7 +10,7 @@ interface FromIterState extends State {
     };
 }
 
-const fromIterSinkProc: Proc = (state, type, _arg) => {
+const fromIterSinkProc: Proc = (state) => (type, _arg) => {
     const fiState = state as FromIterState;
     if (fiState.vars.completed) return;
     if (type === Mode.RUN) {
@@ -39,7 +39,7 @@ const fromIterSinkProc: Proc = (state, type, _arg) => {
     }
 };
 
-const fromIterProc: Proc = (state, type, sink): void => {
+const fromIterProc: Proc = (state) => (type, sink): void => {
     if (type !== Mode.INIT) return;
     const fiState = state as FromIterState;
     fiState.sink = sink as CB;

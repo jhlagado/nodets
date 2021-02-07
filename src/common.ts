@@ -6,8 +6,8 @@ export enum Mode {
      DESTROY = 2,
 }
 
-export type Proc = (state: State, type: Mode, arg?: CB | string | number) => void;
+export type ArgType = CB | string | number;
+export type Proc = (state: State) => (type: Mode, arg?: ArgType) => void;
 export type CB = { state: State; proc: Proc };
-export const send = (cb: CB, type: Mode, arg?: CB | string | number) => cb.proc(cb.state, type, arg);
-export type CBFunc = (source:CB) => CB;
+export const send = (cb: CB, type: Mode, arg?: CB | string | number) => cb.proc(cb.state)(type, arg);
 
