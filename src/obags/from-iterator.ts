@@ -15,18 +15,10 @@ export class CBFromIterator implements CB {
     }
 
     init(sink: CB) {
-        this.sink = sink;
-        sink.init(new CBFTalkback(this, {
-            init() { },
-            run() {
-                if (this.completed) return
-                this.got1 = true;
-                if (!this.inloop && !(this.done)) this.loop();
-            },
-            destroy() {
-                this.completed = true;
-            },
-        }));
+        if (!this.sink) {
+            this.sink = sink;
+            sink.init(this);
+        }
     }
 
     run() {

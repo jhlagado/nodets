@@ -9,7 +9,6 @@ export class CBForEach implements CB {
         this.operation = operation;
         this.source = source;
         this.source?.init(this);
-        this.source?.run();
     }
 
     init(d:any) {
