@@ -20,8 +20,6 @@
     "noFallthroughCasesInSwitch": true,
     "allowJs": false,
     "forceConsistentCasingInFileNames": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "alwaysStrict": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,

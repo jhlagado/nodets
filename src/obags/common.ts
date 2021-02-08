@@ -5,3 +5,6 @@ export interface CB {
 }
 
 export type Operation = (value: string) => void;
+export type Mapper = (value: any) => any;
+
+export type SinkFunc = (source: CB) => CB;

@@ -3,26 +3,29 @@ import { Operation, CB } from "./common";
 export class CBForEach implements CB {
     operation: Operation;
     source: CB | undefined;
+    talkback: CB | undefined;
 
-    constructor(operation: Operation) {
+    constructor(source: CB, operation: Operation) {
         this.operation = operation;
+        this.source = source;
+        this.source?.init(this);
+        this.source?.run();
     }
 
-    init(source: CB) {
-        this.source = source;
-        this.source.init(this);
-        this.source.run();
+    init(d:any) {
+        this.talkback = d;
+        this.talkback?.run();
     }
 
     run(data: any) {
         this.operation(data)
-        this.source?.run();
+        this.talkback?.run();
     }
 
     destroy() {
     }
-
 }
+
 
 // const forEach = operation => source => {
 //     let talkback;

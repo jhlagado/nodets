@@ -1,4 +1,5 @@
 import { CB } from "./common";
+import { CBFTalkback } from "./talkback";
 
 export class CBFromIterator implements CB {
     iterator: Iterator<number>;
@@ -14,10 +15,18 @@ export class CBFromIterator implements CB {
     }
 
     init(sink: CB) {
-        if (!this.sink) {
-            this.sink = sink;
-            sink.init(this);
-        }
+        this.sink = sink;
+        sink.init(new CBFTalkback(this, {
+            init() { },
+            run() {
+                if (this.completed) return
+                this.got1 = true;
+                if (!this.inloop && !(this.done)) this.loop();
+            },
+            destroy() {
+                this.completed = true;
+            },
+        }));
     }
 
     run() {
