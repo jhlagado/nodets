@@ -6,15 +6,11 @@
     "moduleResolution": "node",
     "newLine": "LF",
     "outDir": "./lib/",
-    "target": "es6",
+    "target": "esnext",
     "sourceMap": true,
     "declaration": true,
     "jsx": "preserve",
     "lib": [
-      "es6",
-      "es7",
-      "es2017",
-      "es2018",
       "dom",
       "esnext",
       "esnext.asynciterable"

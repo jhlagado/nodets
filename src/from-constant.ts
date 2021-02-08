@@ -7,7 +7,7 @@ interface FromConstantState extends State {
     };
 }
 
-const fromConstantSinkProc: Proc = (state, type, _arg) => {
+const fromConstantSinkProc: Proc = (state)=>(type, _arg) => {
     const fcState = state as FromConstantState;
     if (fcState.vars.completed) return;
     if (type === Mode.RUN) {
@@ -17,7 +17,7 @@ const fromConstantSinkProc: Proc = (state, type, _arg) => {
     }
 };
 
-const fromConstantProc: Proc = (state, type, sink): void => {
+const fromConstantProc: Proc = (state)=>( type, sink): void => {
     if (type !== Mode.INIT) return;
     const fcState = state as FromConstantState;
     fcState.sink = sink as CB;

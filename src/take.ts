@@ -1,126 +1,85 @@
-// import { CB, Mode, Proc, send, State } from "./common";
+import { ArgType, CB, Mode, Proc, send, State } from './common';
 
-// interface TakeState extends State {
-//     max: number;
-//     talkback?: CB;
-//     vars: {
-//         taken: number;
-//         end: boolean;
-//     }
-// }
+interface TakeState extends State {
+  max: number;
+}
 
-// const takeSourceProc: Proc = (state, type, data) => {
-//     const tkState = state as TakeState;
-//     if (type === Mode.INIT) tkState.talkback = data as CB;
-//     if (type === Mode.RUN) tkState.operation(data as string);
-//     if ((type === Mode.RUN || type === Mode.INIT) && tkState.talkback) send(tkState.talkback, Mode.RUN);
+interface TakeProcState extends TakeState {
+  source: CB;
+}
 
-//       if (type === Mode.DESTROY) {
-//         tkState.vars.end = true;
-//         if (tkState.talkback) send(tkState.talkback, Mode.RUN);
-//       } else if (taken < max) {talkback(t, d);}
-// };
+interface TakeSinkState extends TakeProcState {
+  talkback: CB;
+  sink: CB;
+  vars: {
+    sourceTalkback?: CB;
+    taken: number;
+    end: boolean;
+  };
+}
 
-// export const take = (max: number) => (source: CB) => {
-//     const state: TakeState = {
-//         max,
-//     };
-//     const tb = { state, proc: takeSourceProc };
-//     send(source, Mode.INIT, tb);
-// };
-
-function talkback(state, t, d) {
-    if (t === 2) {
-      end = true;
-      sourceTalkback(t, d);
-    } else if (taken < max) sourceTalkback(t, d);
+const takeSinkTBProc: Proc = (state) => (type, d) => {
+  const {vars, max} = state as TakeSinkState;
+  if (type === Mode.DESTROY) {
+    vars.end = true;
+    send(vars.sourceTalkback, type, d);
+  } else if (vars.taken < max) {
+    send(vars.sourceTalkback, type, d);
   }
+};
 
-
-  const take3 = max => source => (start, sink) => {
-    if (start !== 0) return;
-    let taken = 0;
-    let sourceTalkback;
-    let end;
-    source(0, (t, d) => {
-      if (t === 0) {
-        sourceTalkback = d;
-        sink(0, talkback);
-      } else if (t === 1) {
-        if (taken < max) {
-          taken++;
-          sink(t, d);
-          if (taken === max && !end) {
-            end = true
-            sourceTalkback(2);
-            sink(2);
-          }
-        }
-      } else {
-        sink(t, d);
+const takeSourceTBProc: Proc = (state) => (type, arg) => {
+  const {vars, talkback, sink, max} = state as TakeSinkState;
+  if (type === Mode.INIT) {
+    vars.sourceTalkback = arg as CB;
+    return send(sink, 0, talkback);
+  } else if (type === Mode.RUN) {
+    if (vars.taken < max) {
+      vars.taken++;
+      send(sink, type, arg);
+      if (vars.taken === max && !vars.end) {
+        vars.end = true;
+        send(vars.sourceTalkback, Mode.DESTROY);
+        send(sink, Mode.DESTROY);
       }
-    });
-  };
-  const takeProc = max => source => (start, sink) => {
-    if (start !== 0) return;
-    let taken = 0;
-    let sourceTalkback;
-    let end;
-    source(0, (t, d) => {
-      if (t === 0) {
-        sourceTalkback = d;
-        sink(0, talkback);
-      } else if (t === 1) {
-        if (taken < max) {
-          taken++;
-          sink(t, d);
-          if (taken === max && !end) {
-            end = true
-            sourceTalkback(2);
-            sink(2);
-          }
-        }
-      } else {
-        sink(t, d);
-      }
-    });
-  };
-  
-  
-  const take = max =>  {
-    state: {
-        max,
     }
-    return {
-        state,
-        proc: takeProc,
-    }
+  } else if (type === Mode.DESTROY) {
+    send(sink, Mode.DESTROY);
+  }
+};
 
-    if (start !== 0) return;
-    let taken = 0;
-    let sourceTalkback;
-    let end;
-    source(0, (t, d) => {
-      if (t === 0) {
-        sourceTalkback = d;
-        sink(0, talkback);
-      } else if (t === 1) {
-        if (taken < max) {
-          taken++;
-          sink(t, d);
-          if (taken === max && !end) {
-            end = true
-            sourceTalkback(2);
-            sink(2);
-          }
-        }
-      } else {
-        sink(t, d);
-      }
-    });
+const takeSinkProc: Proc = (state) => (type, sink) => {
+  if (type !== Mode.INIT) return;
+  const tsState = {...state} as TakeSinkState;
+  tsState.sink = sink as CB;
+  tsState.talkback = { state: tsState, proc: takeSinkTBProc };
+  tsState.vars = {
+    taken: 0,
+    end: false,
+    sourceTalkback: undefined,
   };
-  
+  const tb = { state: tsState, proc: takeSourceTBProc };
+  return send(tsState.source as CB, Mode.INIT, tb);
+};
 
+const takeProc: Proc = (state: State) => (_type: Mode, source?: ArgType) => {
+  const tpState: TakeProcState = {
+    ...(state as TakeState),
+    source: source as CB,
+  };
+  const tb = { state: tpState, proc: takeSinkProc };
+  return send(source as CB, Mode.INIT, tb);
+};
+
+export const take = (max: number) => {
+  const tkState: TakeState = {
+    max,
+  };
+  return {
+    state: tkState,
+    proc: takeProc,
+  };
+};
 
 // const take = max => source => (start, sink) => {
 //     if (start !== 0) return;
@@ -152,4 +111,3 @@ function talkback(state, t, d) {
 //       }
 //     });
 //   };
-  

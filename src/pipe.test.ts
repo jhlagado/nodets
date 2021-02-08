@@ -1,12 +1,12 @@
-import { send, Mode } from "./common";
 import { forEach } from "./for-each";
 import { fromIter } from "./from-iter";
+import { pipe } from "./pipe";
 
 test('', ()=>{
     const iterator = [10, 20, 30, 40][Symbol.iterator]();
     const printOp = (value: string) => console.log(value);
     
-    send(forEach(printOp), Mode.INIT, fromIter(iterator));
+    pipe(fromIter(iterator),forEach(printOp))
     
     expect(true).toBe(true);
 

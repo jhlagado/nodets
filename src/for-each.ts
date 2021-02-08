@@ -1,5 +1,4 @@
-import { ArgType, CB, Mode, Proc, send, State } from './common';
-import { fromIter } from './from-iter';
+import { ArgType, CB, Mode, Operation, Proc, send, State } from './common';
 
 interface ForEachState extends State {
     operation: Operation;
@@ -8,8 +7,6 @@ interface ForEachState extends State {
 interface ForEachSourceState extends ForEachState {
     talkback?: CB;
 }
-
-type Operation = (value: string) => void;
 
 const forEachSourceProc: Proc = (state) => (type, data) => {
     const feState = state as ForEachSourceState;
@@ -21,7 +18,7 @@ const forEachSourceProc: Proc = (state) => (type, data) => {
 const forEachProc:Proc = (state:State) => (type: Mode, source?: ArgType) => {
     if (type !== Mode.INIT) return;
     const tb = { state, proc: forEachSourceProc };
-    send(source as CB, Mode.INIT, tb);
+    return send(source as CB, Mode.INIT, tb);
 };
 
 export const forEach = (operation: (value: string) => void) => {
@@ -33,10 +30,3 @@ export const forEach = (operation: (value: string) => void) => {
         proc: forEachProc
     }
 };
-
-const iterator = [10, 20, 30, 40][Symbol.iterator]();
-const source = fromIter(iterator);
-const printOp = (value: string) => console.log(value);
-
-const fe = forEach(printOp);
-send(fe, Mode.INIT, source);
