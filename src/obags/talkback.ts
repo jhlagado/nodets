@@ -1,6 +1,6 @@
 import { CB } from "./common";
 
-export class CBFTalkback implements CB {
+export class CBTalkback implements CB {
     callbacks: any;
     owner: any;
 

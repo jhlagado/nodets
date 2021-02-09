@@ -1,5 +1,5 @@
 import { CB } from "./common";
-import { CBFTalkback } from "./talkback";
+import { CBTalkback } from "./talkback";
 
 export class CBFromIterator implements CB {
     iterator: Iterator<number>;
@@ -15,6 +15,7 @@ export class CBFromIterator implements CB {
     }
 
     init(sink: CB) {
+        // only allow this to happen once (origin sink)
         if (!this.sink) {
             this.sink = sink;
             sink.init(this);

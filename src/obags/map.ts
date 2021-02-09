@@ -1,5 +1,5 @@
 import { CB, Mapper } from "./common";
-import { CBFTalkback } from "./talkback";
+import { CBTalkback } from "./talkback";
 
 export class CBMap implements CB {
     source: any;
@@ -11,25 +11,40 @@ export class CBMap implements CB {
         this.mapper = mapper;
     }
 
-    init(sink: CB) {
+    init1(sink: CB) {
         this.sink = sink;
-        this.source?.init(new CBFTalkback(this, {
+        this.source?.init(new CBTalkback(this, {
             init(d: any) {
                 this.sink.init(d)
             },
             run(d: any) {
-                this.sink.run(this.mapper(d))
+                this.run(d)
             },
             destroy(d: any) {
-                this.sink.destroy(d)
+                this.destroy(d)
             },
         }));
     }
 
-    run() {
+    init(d: CB) {
+        if (!this.sink) {
+            // d is a sink
+            const sink = d;
+            this.sink = sink;
+            this.source?.init(this);
+        } else {
+            // is a talkback from source
+            const sourceTalkback = d;
+            this.sink.init(sourceTalkback)
+        }
     }
 
-    destroy() {
+    run(d: any) {
+        this.sink?.run(this.mapper(d))
+    }
+
+    destroy(d: any) {
+        this.sink?.destroy(d)
     }
 }
 
